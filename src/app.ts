@@ -11,8 +11,9 @@ app.use(cors());
 app.use('/api/v1/students', StudentRoutes);
 
 app.get('/', (req: Request, res: Response) => {
-  const a = 1;
-  res.send(a);
+  res.json({
+    message: 'Welcome to the Student Management System',
+  });
 });
 
 export default app;
