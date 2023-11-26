@@ -7,10 +7,7 @@ import {
   // StudentMethods,
   StudentModel,
   TUserName,
-} from './student/student.interface';
-
-import bcrypt from 'bcrypt';
-import config from '../config';
+} from './student.interface';
 
 const userSchema = new Schema<TUserName>({
   firstName: {
@@ -104,12 +101,13 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       unique: true,
       trim: true,
     },
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      trim: true,
-      maxlength: [20, 'Password cannot exceed 20 characters'],
+    user: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'User ID is required'],
+      unique: true,
+      ref: 'User',
     },
+
     name: {
       type: userSchema,
       required: [true, 'Student name is required'],
@@ -162,12 +160,7 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       required: [true, 'Local guardian information is required'],
     },
     profileImg: { type: String },
-    isActive: {
-      type: String,
-      enum: ['active', 'blocked'],
-      default: 'active',
-      required: [true, 'Status (active/blocked) is required'],
-    },
+
     isDeleted: {
       type: Boolean,
       default: false,
@@ -189,17 +182,6 @@ studentSchema.virtual('fullName').get(function () {
 
 // pre middleware
 // document middlewares-----------------------------
-studentSchema.pre('save', async function (next) {
-  // console.log(this, 'pre hook: we will save the document');
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this;
-  // password hashing with bcrypt
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
 
 // query middleware----------------------------------
 studentSchema.pre('find', function (next) {
@@ -214,11 +196,6 @@ studentSchema.pre('findOne', function (next) {
 // aggregation middleware-----------------------------
 studentSchema.pre('aggregate', function (next) {
   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
-  next();
-});
-// post middleware
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
   next();
 });
 
