@@ -9,13 +9,13 @@ import {
 const academicSemesterSchema = new Schema<TAcademicSemester>(
   {
     name: {
-      enum: AcademicSemesterName,
       type: String,
+      enum: AcademicSemesterName,
       required: [true, 'Semester name is required'],
     },
     code: {
-      enum: AcademicSemesterCode,
       type: String,
+      enum: AcademicSemesterCode,
       required: [true, 'Semester code is required'],
     },
     year: {
@@ -23,14 +23,14 @@ const academicSemesterSchema = new Schema<TAcademicSemester>(
       required: [true, 'Semester year is required'],
     },
     startMonth: {
-      enum: Months,
       type: String,
       required: [true, 'Semester end month is required'],
+      enum: Months,
     },
     endMonth: {
-      enum: Months,
       type: String,
       required: [true, 'Semester start month is required'],
+      enum: Months,
     },
   },
   {
