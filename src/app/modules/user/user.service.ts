@@ -18,10 +18,8 @@ const createStudentIntoDB = async (password: string, payLoad: TStudent) => {
   const admissionSemester = await AcademicSemester.findById(
     payLoad.admissionSemester,
   );
-  if (!admissionSemester) {
-    throw new Error('Invalid admission semester');
-  }
-  userData.id = await generateStudentId(admissionSemester);
+
+  userData.id = await generateStudentId(admissionSemester!);
 
   // create a user
   const newUser = await User.create(userData);
