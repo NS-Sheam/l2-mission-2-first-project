@@ -30,7 +30,7 @@ const createStudentIntoDB = async (password: string, payLoad: TStudent) => {
     // create a user (Transaction-1)
     const newUser = await User.create([userData], { session });
 
-    if (newUser.length) {
+    if (!newUser) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
     }
     payLoad.id = newUser[0].id;
@@ -38,7 +38,7 @@ const createStudentIntoDB = async (password: string, payLoad: TStudent) => {
 
     // create a student (Transaction-2)
     const newStudent = await Student.create([payLoad], { session });
-    if (!newStudent.length) {
+    if (!newStudent) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
     }
 
@@ -49,6 +49,7 @@ const createStudentIntoDB = async (password: string, payLoad: TStudent) => {
   } catch (error) {
     await session.abortTransaction();
     await session.endSession();
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
   }
 };
 
