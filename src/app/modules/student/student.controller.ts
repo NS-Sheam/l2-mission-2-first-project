@@ -5,7 +5,7 @@ import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
 
 const getAllStudents = catchAsync(async (req, res) => {
-  const result = await studentServices.getAllStudentsFromDB();
+  const result = await studentServices.getAllStudentsFromDB(req.query);
   res.status(200).json({
     status: true,
     message: 'Students retrived successfully',
