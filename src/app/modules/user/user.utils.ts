@@ -19,13 +19,6 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
   const lastStudentYear = lastStudentId?.substring(0, 4);
   const currentSemesterCode = payload.code;
   const currentYear = payload.year;
-  console.log(
-    lastStudentId,
-    lastSemesterCode,
-    lastStudentYear,
-    currentSemesterCode,
-    currentYear,
-  );
 
   if (
     lastStudentId &&
@@ -38,4 +31,20 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
   let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
   incrementId = `${payload.year}${payload.code}${incrementId}`;
   return incrementId;
+};
+
+export const generateFacultyId = async () => {
+  const lastFaculty = await User.findOne(
+    { role: 'faculty' },
+    { id: 1, _id: 0 },
+    { sort: { createdAt: -1 } },
+  );
+
+  const lastFacultyId = lastFaculty?.id || undefined;
+  const currentId = lastFacultyId?.substring(2) || (0).toString();
+  let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+
+  const facultyId = `F-${incrementId}`;
+
+  return facultyId;
 };

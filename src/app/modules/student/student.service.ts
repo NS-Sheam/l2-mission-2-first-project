@@ -4,17 +4,12 @@ import { User } from '../user/user.model';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { TStudent } from './student.interface';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { studentSearchableFields } from './student.const';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   const queryObject = { ...query };
-
-  const studentSearchableFields = [
-    'email',
-    'name.firstName',
-    'name.lastName',
-    'presentAddress',
-  ];
-
+  /*--------------------------------------------------------------
   let searchTerm = '';
   if (query?.searchTerm) {
     searchTerm = query.searchTerm as string;
@@ -25,10 +20,11 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     })),
   });
 
+  // filter query
   // remove fields from query
-  const excludeFields = ['searchTerm', 'sort', 'limit'];
+  const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
 
-  excludeFields.forEach((field) => delete queryObject[field]);
+  excludeFields.forEach((el) => delete queryObject[el]);
 
   const filterQuery = searchQuery
     .find(queryObject)
@@ -47,15 +43,51 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
 
   const sortQuery = filterQuery.sort(sort);
 
-  let limit = 1;
+  let page = 1;
+  let limit = 10;
+  let skip = 0;
   if (query.limit) {
     limit = Number(query.limit);
   }
+  if (query.page) {
+    page = Number(query.page);
+    skip = (page - 1) * limit;
+  }
 
-  const limitQuery = sortQuery.limit(limit);
+  const paginateQuery = sortQuery.skip(skip);
+
+  const limitQuery = paginateQuery.limit(limit);
+
+  // field limiting
+
+  let fields = '-__v';
+  if (query.fields) {
+    fields = (query.fields as string).split(',').join(' ');
+  }
+
+  const fieldQuery = await limitQuery.select(fields);
 
   // const result = await Student.aggregate([{ $match: {} }]);
-  return limitQuery;
+  return fieldQuery;
+  ---------------------------------------------*/
+
+  const studentQuery = new QueryBuilder(Student.find(), query)
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await studentQuery.modelQuery
+    .populate('admissionSemester')
+    .populate({
+      path: 'academicDepartment',
+      populate: {
+        path: 'academicFaculty',
+      },
+    });
+
+  return result;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
@@ -67,6 +99,7 @@ const getSingleStudentFromDB = async (id: string) => {
         path: 'academicFaculty',
       },
     });
+
   return result;
 };
 
