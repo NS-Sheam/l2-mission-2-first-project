@@ -5,11 +5,17 @@ import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
-import { generateFacultyId, generateStudentId } from './user.utils';
+import {
+  generateAdminId,
+  generateFacultyId,
+  generateStudentId,
+} from './user.utils';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
+import { TAdmin } from '../admin/admin.interface';
+import { Admin } from '../admin/admin.model';
 
 const createStudentIntoDB = async (password: string, payLoad: TStudent) => {
   const userData: Partial<TUser> = {};
@@ -93,7 +99,38 @@ const createFacultyIntoDB = async (password: string, payLoad: TFaculty) => {
   }
 };
 
+const createAdminIntoDB = async (password: string, payload: TAdmin) => {
+  const userData: Partial<TUser> = {};
+  userData.password = password || config.default_password;
+  userData.role = 'admin';
+  userData.id = await generateAdminId();
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    // Transaction-1
+    const newUser = await User.create([userData], { session });
+    if (!newUser) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
+    }
+    payload.id = newUser[0].id;
+    payload.user = newUser[0]._id;
+    // Transaction-2
+    const newAdmin = await Admin.create([payload], { session });
+    if (!newAdmin) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create admin');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return newAdmin;
+  } catch (error) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create admin');
+  }
+};
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
+  createAdminIntoDB,
 };

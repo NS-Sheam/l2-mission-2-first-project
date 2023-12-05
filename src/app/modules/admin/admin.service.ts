@@ -1,17 +1,17 @@
 import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
-import { TFaculty } from './faculty.interface';
-import { Faculty } from './faculty.model';
+import { Admin } from './admin.model';
+import { TAdmin } from './admin.interface';
 import { User } from '../user/user.model';
 
-const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
-  const facultyQuery = new QueryBuilder(Faculty.find(), query)
+const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
+  const adminQuery = new QueryBuilder(Admin.find(), query)
     .filter()
     .sort()
     .paginate()
     .fields();
-  const result = await facultyQuery.modelQuery.populate({
-    path: 'academicDepartment',
+  const result = await adminQuery.modelQuery.populate({
+    path: 'managementDepartment',
     populate: {
       path: 'academicFaculty',
     },
@@ -20,9 +20,9 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
   return result;
 };
 
-const getSingleFacultyFromDB = async (id: string) => {
-  const result = await Faculty.findOne({ id }).populate({
-    path: 'academicDepartment',
+const getSingleAdminFromDB = async (id: string) => {
+  const result = await Admin.findOne({ id }).populate({
+    path: 'managementDepartment',
     populate: {
       path: 'academicFaculty',
     },
@@ -31,7 +31,7 @@ const getSingleFacultyFromDB = async (id: string) => {
   return result;
 };
 
-const updateFacultyIntoDB = async (id: string, payload: Partial<TFaculty>) => {
+const updateAdminIntoDB = async (id: string, payload: Partial<TAdmin>) => {
   const { name, ...remaining } = payload;
   const modifiedObject: Record<string, unknown> = {
     ...remaining,
@@ -40,25 +40,25 @@ const updateFacultyIntoDB = async (id: string, payload: Partial<TFaculty>) => {
     for (const [key, value] of Object.entries(name))
       modifiedObject[`name.${key}`] = value;
   }
-  const result = await Faculty.findOneAndUpdate({ id }, modifiedObject, {
+  const result = await Admin.findOneAndUpdate({ id }, modifiedObject, {
     new: true,
   });
   return result;
 };
 
-const deleteFacultyFromDB = async (id: string) => {
+const deleteAdminFromDB = async (id: string) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
 
     // Transaction 1
-    const deletedFaculty = await Faculty.findOneAndUpdate(
+    const deletedAdmin = await Admin.findOneAndUpdate(
       { id },
       { isDeleted: true },
       { session },
     );
-    if (!deletedFaculty) {
-      throw new Error('Failed to delete faculty');
+    if (!deletedAdmin) {
+      throw new Error('Failed to delete admin');
     }
 
     // Transaction 2
@@ -73,17 +73,17 @@ const deleteFacultyFromDB = async (id: string) => {
 
     await session.commitTransaction();
     await session.endSession();
-    return deletedFaculty;
+    return deletedAdmin;
   } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error('Failed to delete faculty');
+    throw new Error('Failed to delete admin');
   }
 };
 
-export const FacultyServices = {
-  getAllFacultiesFromDB,
-  getSingleFacultyFromDB,
-  updateFacultyIntoDB,
-  deleteFacultyFromDB,
+export const AdminServices = {
+  getAllAdminsFromDB,
+  getSingleAdminFromDB,
+  updateAdminIntoDB,
+  deleteAdminFromDB,
 };

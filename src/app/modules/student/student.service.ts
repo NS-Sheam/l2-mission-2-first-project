@@ -8,8 +8,8 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { studentSearchableFields } from './student.const';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  const queryObject = { ...query };
   /*--------------------------------------------------------------
+  const queryObject = { ...query };
   let searchTerm = '';
   if (query?.searchTerm) {
     searchTerm = query.searchTerm as string;

@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
-import { TFaculty, TUserName } from './faculty.interface';
+
+import { TAdmin, TUserName } from './admin.interface';
 
 const userSchema = new Schema<TUserName>({
   firstName: {
@@ -16,7 +17,7 @@ const userSchema = new Schema<TUserName>({
   },
 });
 
-const facultySchema = new Schema<TFaculty>(
+const adminSchema = new Schema<TAdmin>(
   {
     id: {
       type: String,
@@ -65,14 +66,9 @@ const facultySchema = new Schema<TFaculty>(
       type: String,
       required: true,
     },
-    academicDepartment: {
+    managementDepartment: {
       type: Schema.Types.ObjectId,
       ref: 'AcademicDepartment',
-      required: true,
-    },
-    academicFaculty: {
-      type: Schema.Types.ObjectId,
-      ref: 'AcademicFaculty',
       required: true,
     },
     designation: {
@@ -92,4 +88,4 @@ const facultySchema = new Schema<TFaculty>(
   },
 );
 
-export const Faculty = model<TFaculty>('Faculty', facultySchema);
+export const Admin = model<TAdmin>('Admin', adminSchema);

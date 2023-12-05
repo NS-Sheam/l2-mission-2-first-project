@@ -14,10 +14,10 @@ const createUserNameValidationSchema = z.object({
   middleName: z.string().optional(),
   lastName: z.string().max(20),
 });
-const createFacultyValidationSchema = z.object({
+const createAdminValidationSchema = z.object({
   body: z.object({
     password: z.string().max(20),
-    faculty: z.object({
+    admin: z.object({
       name: createUserNameValidationSchema,
       gender: z.enum(['male', 'female', 'others']),
       dateOfBirth: z.string().optional(),
@@ -26,8 +26,7 @@ const createFacultyValidationSchema = z.object({
       emergencyContactNo: z.string().min(1),
       presentAddress: z.string().min(1),
       permanentAddress: z.string().min(1),
-      academicDepartment: z.string(),
-      academicFaculty: z.string(),
+      managementDepartment: z.string(),
       designation: z.string(),
       profileImg: z.string().optional(),
     }),
@@ -50,10 +49,10 @@ const updateUserNameValidationSchema = z.object({
   lastName: z.string().max(20).optional(),
 });
 
-const updateFacultyValidationSchema = z.object({
+const updateAdminValidationSchema = z.object({
   body: z.object({
     password: z.string().max(20).optional(),
-    faculty: z.object({
+    admin: z.object({
       name: updateUserNameValidationSchema.optional(),
       gender: z.enum(['male', 'female', 'others']).optional(),
       dateOfBirth: z.string().optional(),
@@ -62,15 +61,14 @@ const updateFacultyValidationSchema = z.object({
       emergencyContactNo: z.string().min(1).optional(),
       presentAddress: z.string().min(1).optional(),
       permanentAddress: z.string().min(1).optional(),
-      academicDepartment: z.string().optional(),
-      academicFaculty: z.string().optional(),
+      managementDepartment: z.string().optional(),
       designation: z.string().optional(),
       profileImg: z.string().optional().optional(),
     }),
   }),
 });
 
-export const facultyValidation = {
-  createFacultyValidationSchema,
-  updateFacultyValidationSchema,
+export const adminValidation = {
+  createAdminValidationSchema,
+  updateAdminValidationSchema,
 };
