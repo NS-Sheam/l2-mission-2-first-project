@@ -2,8 +2,8 @@ import express from 'express';
 import { UserControllers } from './user.controller';
 import { studentValidation } from '../student/student.validation';
 import validateRequest from '../../middlewares/validateRequest';
-import { facultyValidation } from '../faculty/faculty.validation';
-import { adminValidation } from '../admin/admin.validation';
+import { facultyValidations } from '../faculty/faculty.validation';
+import { AdminValidations } from '../admin/admin.validation';
 const router = express.Router();
 
 router.post(
@@ -13,13 +13,13 @@ router.post(
 );
 router.post(
   '/create-faculty',
-  validateRequest(facultyValidation.createFacultyValidationSchema),
+  validateRequest(facultyValidations.createFacultyValidationSchema),
   UserControllers.createFaculty,
 );
 
 router.post(
   '/create-admin',
-  validateRequest(adminValidation.createAdminValidationSchema),
+  validateRequest(AdminValidations.createAdminValidationSchema),
   UserControllers.createAdmin,
 );
 

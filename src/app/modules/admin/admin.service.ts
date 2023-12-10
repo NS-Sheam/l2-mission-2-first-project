@@ -10,23 +10,13 @@ const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fields();
-  const result = await adminQuery.modelQuery.populate({
-    path: 'managementDepartment',
-    populate: {
-      path: 'academicFaculty',
-    },
-  });
+  const result = await adminQuery.modelQuery;
 
   return result;
 };
 
 const getSingleAdminFromDB = async (id: string) => {
-  const result = await Admin.findOne({ id }).populate({
-    path: 'managementDepartment',
-    populate: {
-      path: 'academicFaculty',
-    },
-  });
+  const result = await Admin.findById(id);
 
   return result;
 };
@@ -40,7 +30,7 @@ const updateAdminIntoDB = async (id: string, payload: Partial<TAdmin>) => {
     for (const [key, value] of Object.entries(name))
       modifiedObject[`name.${key}`] = value;
   }
-  const result = await Admin.findOneAndUpdate({ id }, modifiedObject, {
+  const result = await Admin.findByIdAndUpdate(id, modifiedObject, {
     new: true,
   });
   return result;
@@ -52,20 +42,22 @@ const deleteAdminFromDB = async (id: string) => {
     session.startTransaction();
 
     // Transaction 1
-    const deletedAdmin = await Admin.findOneAndUpdate(
-      { id },
+    const deletedAdmin = await Admin.findById(
+      id,
       { isDeleted: true },
-      { session },
+      { new: true, session },
     );
     if (!deletedAdmin) {
       throw new Error('Failed to delete admin');
     }
 
+    const userId = deletedAdmin.user;
+
     // Transaction 2
-    const deletedUser = await User.findOneAndUpdate(
-      { id },
+    const deletedUser = await User.findByIdAndUpdate(
+      userId,
       { isDeleted: true },
-      { session },
+      { new: true, session },
     );
     if (!deletedUser) {
       throw new Error('Failed to delete user');

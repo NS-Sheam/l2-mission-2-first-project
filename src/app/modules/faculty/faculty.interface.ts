@@ -1,24 +1,40 @@
-import { Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
+
+export type TGender = 'male' | 'female' | 'other';
+export type TBloodGroup =
+  | 'A+'
+  | 'A-'
+  | 'B+'
+  | 'B-'
+  | 'AB+'
+  | 'AB-'
+  | 'O+'
+  | 'O-';
 
 export type TUserName = {
   firstName: string;
-  middleName?: string;
+  middleName: string;
   lastName: string;
 };
+
 export type TFaculty = {
   id: string;
   user: Types.ObjectId;
+  designation: string;
   name: TUserName;
-  gender: 'male' | 'female' | 'others';
+  gender: TGender;
   dateOfBirth?: Date;
   email: string;
   contactNo: string;
   emergencyContactNo: string;
+  bloogGroup?: TBloodGroup;
   presentAddress: string;
   permanentAddress: string;
-  academicDepartment: Types.ObjectId;
-  academicFaculty: Types.ObjectId;
-  designation: string;
   profileImg?: string;
+  academicDepartment: Types.ObjectId;
   isDeleted: boolean;
 };
+
+export interface FacultyModel extends Model<TFaculty> {
+  isUserExists(id: string): Promise<TFaculty | null>;
+}

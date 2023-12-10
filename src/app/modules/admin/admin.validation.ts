@@ -1,74 +1,56 @@
 import { z } from 'zod';
+import { BloodGroup, Gender } from './admin.constant';
 
 const createUserNameValidationSchema = z.object({
-  firstName: z
-    .string()
-    .min(1)
-    .max(20)
-    .refine(
-      (value) => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(),
-      {
-        message: 'First name must be in capitalize format',
-      },
-    ),
-  middleName: z.string().optional(),
+  firstName: z.string().min(1).max(20),
+  middleName: z.string().max(20),
   lastName: z.string().max(20),
 });
-const createAdminValidationSchema = z.object({
+
+export const createAdminValidationSchema = z.object({
   body: z.object({
     password: z.string().max(20),
     admin: z.object({
+      designation: z.string(),
       name: createUserNameValidationSchema,
-      gender: z.enum(['male', 'female', 'others']),
+      gender: z.enum([...Gender] as [string, ...string[]]),
       dateOfBirth: z.string().optional(),
       email: z.string().email(),
-      contactNo: z.string().min(1),
-      emergencyContactNo: z.string().min(1),
-      presentAddress: z.string().min(1),
-      permanentAddress: z.string().min(1),
-      managementDepartment: z.string(),
-      designation: z.string(),
-      profileImg: z.string().optional(),
+      contactNo: z.string(),
+      emergencyContactNo: z.string(),
+      bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]),
+      presentAddress: z.string(),
+      permanentAddress: z.string(),
+      profileImg: z.string(),
     }),
   }),
 });
 
 const updateUserNameValidationSchema = z.object({
-  firstName: z
-    .string()
-    .min(1)
-    .max(20)
-    .refine(
-      (value) => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(),
-      {
-        message: 'First name must be in capitalize format',
-      },
-    )
-    .optional(),
-  middleName: z.string().optional(),
-  lastName: z.string().max(20).optional(),
+  firstName: z.string().min(3).max(20).optional(),
+  middleName: z.string().min(3).max(20).optional(),
+  lastName: z.string().min(3).max(20).optional(),
 });
 
-const updateAdminValidationSchema = z.object({
+export const updateAdminValidationSchema = z.object({
   body: z.object({
-    password: z.string().max(20).optional(),
     admin: z.object({
-      name: updateUserNameValidationSchema.optional(),
-      gender: z.enum(['male', 'female', 'others']).optional(),
+      name: updateUserNameValidationSchema,
+      designation: z.string().max(30).optional(),
+      gender: z.enum([...Gender] as [string, ...string[]]).optional(),
       dateOfBirth: z.string().optional(),
       email: z.string().email().optional(),
-      contactNo: z.string().min(1).optional(),
-      emergencyContactNo: z.string().min(1).optional(),
-      presentAddress: z.string().min(1).optional(),
-      permanentAddress: z.string().min(1).optional(),
-      managementDepartment: z.string().optional(),
-      designation: z.string().optional(),
-      profileImg: z.string().optional().optional(),
+      contactNo: z.string().optional(),
+      emergencyContactNo: z.string().optional(),
+      bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]).optional(),
+      presentAddress: z.string().optional(),
+      permanentAddress: z.string().optional(),
+      profileImg: z.string().optional(),
     }),
   }),
 });
 
-export const adminValidation = {
+export const AdminValidations = {
   createAdminValidationSchema,
   updateAdminValidationSchema,
 };

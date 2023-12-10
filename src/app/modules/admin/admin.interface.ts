@@ -1,5 +1,14 @@
-import { Types } from 'mongoose';
-
+import { Model, Types } from 'mongoose';
+export type TGender = 'male' | 'female' | 'other';
+export type TBloodGroup =
+  | 'A+'
+  | 'A-'
+  | 'B+'
+  | 'B-'
+  | 'AB+'
+  | 'AB-'
+  | 'O+'
+  | 'O-';
 export type TUserName = {
   firstName: string;
   middleName?: string;
@@ -11,6 +20,7 @@ export type TAdmin = {
   name: TUserName;
   gender: 'male' | 'female' | 'others';
   dateOfBirth?: Date;
+  bloodGroup?: TBloodGroup;
   email: string;
   contactNo: string;
   emergencyContactNo: string;
@@ -21,3 +31,7 @@ export type TAdmin = {
   profileImg?: string;
   isDeleted: boolean;
 };
+
+export interface AdminModel extends Model<TAdmin> {
+  isUserExists(id: string): Promise<TAdmin | null>;
+}

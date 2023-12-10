@@ -21,7 +21,7 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleFacultyFromDB = async (id: string) => {
-  const result = await Faculty.findOne({ id }).populate({
+  const result = await Faculty.findById(id).populate({
     path: 'academicDepartment',
     populate: {
       path: 'academicFaculty',
@@ -32,16 +32,18 @@ const getSingleFacultyFromDB = async (id: string) => {
 };
 
 const updateFacultyIntoDB = async (id: string, payload: Partial<TFaculty>) => {
-  const { name, ...remaining } = payload;
+  const { name, ...remainingFacultyData } = payload;
+
   const modifiedObject: Record<string, unknown> = {
-    ...remaining,
+    ...remainingFacultyData,
   };
   if (name && Object.keys(name).length) {
     for (const [key, value] of Object.entries(name))
       modifiedObject[`name.${key}`] = value;
   }
-  const result = await Faculty.findOneAndUpdate({ id }, modifiedObject, {
+  const result = await Faculty.findByIdAndUpdate(id, modifiedObject, {
     new: true,
+    runValidators: true,
   });
   return result;
 };
@@ -52,20 +54,22 @@ const deleteFacultyFromDB = async (id: string) => {
     session.startTransaction();
 
     // Transaction 1
-    const deletedFaculty = await Faculty.findOneAndUpdate(
-      { id },
+    const deletedFaculty = await Faculty.findByIdAndUpdate(
+      id,
       { isDeleted: true },
-      { session },
+      { new: true, session },
     );
     if (!deletedFaculty) {
       throw new Error('Failed to delete faculty');
     }
 
+    const userId = deletedFaculty.user;
+
     // Transaction 2
-    const deletedUser = await User.findOneAndUpdate(
-      { id },
+    const deletedUser = await User.findByIdAndUpdate(
+      userId,
       { isDeleted: true },
-      { session },
+      { new: true, session },
     );
     if (!deletedUser) {
       throw new Error('Failed to delete user');

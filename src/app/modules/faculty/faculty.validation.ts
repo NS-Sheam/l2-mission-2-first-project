@@ -1,76 +1,64 @@
 import { z } from 'zod';
+import { BloodGroup, Gender } from './faculty.constant';
 
 const createUserNameValidationSchema = z.object({
   firstName: z
     .string()
     .min(1)
     .max(20)
-    .refine(
-      (value) => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(),
-      {
-        message: 'First name must be in capitalize format',
-      },
-    ),
-  middleName: z.string().optional(),
-  lastName: z.string().max(20),
+    .refine((value) => /^[A-Z]/.test(value), {
+      message: 'First Name must start with a capital letter',
+    }),
+  middleName: z.string(),
+  lastName: z.string(),
 });
-const createFacultyValidationSchema = z.object({
+
+export const createFacultyValidationSchema = z.object({
   body: z.object({
     password: z.string().max(20),
     faculty: z.object({
+      designation: z.string(),
       name: createUserNameValidationSchema,
-      gender: z.enum(['male', 'female', 'others']),
+      gender: z.enum([...Gender] as [string, ...string[]]),
       dateOfBirth: z.string().optional(),
       email: z.string().email(),
-      contactNo: z.string().min(1),
-      emergencyContactNo: z.string().min(1),
-      presentAddress: z.string().min(1),
-      permanentAddress: z.string().min(1),
+      contactNo: z.string(),
+      emergencyContactNo: z.string(),
+      bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]),
+      presentAddress: z.string(),
+      permanentAddress: z.string(),
       academicDepartment: z.string(),
-      academicFaculty: z.string(),
-      designation: z.string(),
-      profileImg: z.string().optional(),
+      profileImg: z.string(),
     }),
   }),
 });
 
 const updateUserNameValidationSchema = z.object({
-  firstName: z
-    .string()
-    .min(1)
-    .max(20)
-    .refine(
-      (value) => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(),
-      {
-        message: 'First name must be in capitalize format',
-      },
-    )
-    .optional(),
+  firstName: z.string().min(1).max(20).optional(),
   middleName: z.string().optional(),
-  lastName: z.string().max(20).optional(),
+  lastName: z.string().optional(),
 });
 
-const updateFacultyValidationSchema = z.object({
+export const updateFacultyValidationSchema = z.object({
   body: z.object({
-    password: z.string().max(20).optional(),
     faculty: z.object({
+      designation: z.string().optional(),
       name: updateUserNameValidationSchema.optional(),
-      gender: z.enum(['male', 'female', 'others']).optional(),
+      gender: z.enum([...Gender] as [string, ...string[]]).optional(),
       dateOfBirth: z.string().optional(),
       email: z.string().email().optional(),
-      contactNo: z.string().min(1).optional(),
-      emergencyContactNo: z.string().min(1).optional(),
-      presentAddress: z.string().min(1).optional(),
-      permanentAddress: z.string().min(1).optional(),
+      contactNo: z.string().optional(),
+      emergencyContactNo: z.string().optional(),
+      bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]).optional(),
+      presentAddress: z.string().optional(),
+      permanentAddress: z.string().optional(),
+      profileImg: z.string().optional(),
       academicDepartment: z.string().optional(),
-      academicFaculty: z.string().optional(),
-      designation: z.string().optional(),
-      profileImg: z.string().optional().optional(),
     }),
   }),
 });
 
-export const facultyValidation = {
+export const facultyValidations = {
   createFacultyValidationSchema,
   updateFacultyValidationSchema,
 };
