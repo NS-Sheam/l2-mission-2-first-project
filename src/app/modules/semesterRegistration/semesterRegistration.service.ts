@@ -5,6 +5,8 @@ import { TSemesterRegistration } from './semesterRegistration.interface';
 import { SemesterRegistration } from './semesterRegistration.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { RegistrationStatus } from './semesterRegistration.const';
+import mongoose from 'mongoose';
+import { OfferedCourse } from '../offeredCourse/offeredCourse.model';
 
 const createSemesterRegistrationIntoDB = async (
   payload: TSemesterRegistration,
@@ -117,9 +119,59 @@ const updateSemesterRegistrationIntoDB = async (
   return result;
 };
 
+const deleteSemesterRegistrationFromDB = async (id: string) => {
+  const isSemesterRegistrationExists = await SemesterRegistration.findById(id);
+  if (!isSemesterRegistrationExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Semester Registration not found');
+  }
+  if (isSemesterRegistrationExists.status !== 'UPCOMING') {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `this ${isSemesterRegistrationExists.status} semester registration is not upcomming`,
+    );
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    // start transaction
+    await session.startTransaction();
+    // delete semester registration
+    // transaction-1
+    const deletedSemesterRegistration =
+      await SemesterRegistration.findByIdAndDelete(id, { session });
+    if (!deletedSemesterRegistration) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        'Semester Registration not found',
+      );
+    }
+
+    // delete all the offered courses of this semester registration
+    // transaction-2
+    const deletedOfferedCourses = await OfferedCourse.deleteMany(
+      { semesterRegistration: id },
+      { session },
+    );
+    if (!deletedOfferedCourses) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Offered Courses not found');
+    }
+
+    // commit transaction
+    await session.commitTransaction();
+    await session.endSession();
+    return deletedSemesterRegistration;
+  } catch (error) {
+    // abort transaction
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to delete');
+  }
+};
+
 export const SemesterRegistrationService = {
   createSemesterRegistrationIntoDB,
   getAllSemesterRegistrationsFromDB,
   getSingleSemesterRegistrationFromDB,
   updateSemesterRegistrationIntoDB,
+  deleteSemesterRegistrationFromDB,
 };
