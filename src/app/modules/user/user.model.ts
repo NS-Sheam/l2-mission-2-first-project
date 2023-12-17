@@ -1,9 +1,9 @@
 import { Schema, model } from 'mongoose';
-import { TUser } from './user.interface';
+import { TUser, UserModel } from './user.interface';
 import bcrypt from 'bcrypt';
 import config from '../../config';
 
-const userSchema = new Schema<TUser>(
+const userSchema = new Schema<TUser, UserModel>(
   {
     id: {
       type: String,
@@ -15,10 +15,12 @@ const userSchema = new Schema<TUser>(
       required: [true, 'Password is required'],
       trim: true,
       maxlength: [20, 'Password cannot exceed 20 characters'],
+      select: 0,
     },
     needsPasswordChange: {
       type: Boolean,
       default: true,
+      select: 0,
     },
     role: {
       type: String,
@@ -58,4 +60,15 @@ userSchema.post('save', function (doc, next) {
   next();
 });
 
-export const User = model<TUser>('User', userSchema);
+userSchema.statics.isUserExistsByCustomId = async function (id: string) {
+  return await User.findOne({ id }).select('+password');
+};
+
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword: string,
+  hashedPassword: string,
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
+export const User = model<TUser, UserModel>('User', userSchema);
