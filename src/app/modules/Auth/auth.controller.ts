@@ -2,31 +2,50 @@ import { Request, Response } from 'express';
 import { AuthServices } from './auth.service';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
+import config from '../../config';
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.loginUser(req.body);
+  const { refreshToken, accessToken, needsPasswordChange } = result;
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+  });
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'User logged in successfully',
-    data: result,
+    data: {
+      accessToken,
+      needsPasswordChange,
+    },
   });
 });
 const changePassword = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
   const { ...passwordData } = req.body;
 
-  const result = await AuthServices.changePassword(user, passwordData);
+  const result = await AuthServices.changePassword(req.user, passwordData);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'User logged in successfully',
-    data: null,
+    message: 'Password updated successfully',
+    data: result,
+  });
+});
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+  const result = await AuthServices.refreshToken(refreshToken);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Access token updated successfully',
+    data: result,
   });
 });
 
 export const AuthControllers = {
   loginUser,
   changePassword,
+  refreshToken,
 };

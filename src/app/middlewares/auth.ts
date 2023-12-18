@@ -5,6 +5,7 @@ import httpStatus from 'http-status';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
+import { User } from '../modules/user/user.model';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -16,23 +17,53 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     // verify the token
-    jwt.verify(
+
+    const decoded = jwt.verify(
       token,
       config.jwt_access_secret as string,
-      function (err, decoded) {
-        if (err) {
-          throw new AppError(httpStatus.UNAUTHORIZED, "You're not authorized");
-        }
-        const role = (decoded as JwtPayload)?.role;
+    ) as JwtPayload;
 
-        if (requiredRoles && !requiredRoles.includes(role)) {
-          throw new AppError(httpStatus.UNAUTHORIZED, "You're not authorized");
-        }
+    const { userId, role, iat, exp } = decoded as JwtPayload;
 
-        req.user = decoded as JwtPayload;
-        next();
-      },
-    );
+    //   checking if the user is exist in the database
+
+    const user = await User.isUserExistsByCustomId(userId);
+
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    //   checking if the user is already deleted
+    if (user?.isDeleted) {
+      throw new AppError(httpStatus.FORBIDDEN, 'User is already deleted');
+    }
+
+    const userStatus = user?.status;
+
+    //   checking if the user is already blocked
+    if (userStatus === 'blocked') {
+      throw new AppError(httpStatus.BAD_REQUEST, 'User is already blocked');
+    }
+
+    if (
+      user?.passwordChangedAt &&
+      User.isJWTIssuedBeforePasswordChanged(
+        user.passwordChangedAt,
+        iat as number,
+      )
+    ) {
+      throw new AppError(
+        httpStatus.UNAUTHORIZED,
+        'Password changed after the token issued',
+      );
+    }
+
+    if (requiredRoles && !requiredRoles.includes(role)) {
+      throw new AppError(httpStatus.UNAUTHORIZED, "You're not authorized");
+    }
+
+    req.user = decoded as JwtPayload;
+    next();
   });
 };
 
