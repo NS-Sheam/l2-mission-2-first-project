@@ -21,7 +21,6 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     startTime,
     endTime,
   } = payload;
-  console.log('payload', payload);
 
   // check if the semester registration id is exist
   const isSemesterRegistrationExists =

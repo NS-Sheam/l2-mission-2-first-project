@@ -23,7 +23,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
       config.jwt_access_secret as string,
     ) as JwtPayload;
 
-    const { userId, role, iat, exp } = decoded as JwtPayload;
+    const { userId, role, iat } = decoded as JwtPayload;
 
     //   checking if the user is exist in the database
 
