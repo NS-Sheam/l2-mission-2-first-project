@@ -13,8 +13,10 @@ export const hasTimeConflict = (
     // 10:30 - 12:30
     // 11:30 - 13:30
     // 09:30 - 11:30
+    if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
+      return true;
+    }
   }
 
-  assignedSchedule.forEach((schedule) => {});
   return false;
 };

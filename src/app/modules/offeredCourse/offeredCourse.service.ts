@@ -98,7 +98,7 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   if (hasTimeConflict(assignedSchedule, newSchedule)) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      `this ${isFacultyExists.name} has time conflict`,
+      `this faculty has time conflict`,
     );
   }
 

@@ -12,7 +12,7 @@ import {
   generateStudentId,
 } from './user.utils';
 import AppError from '../../errors/AppError';
-import httpStatus, { NOT_EXTENDED } from 'http-status';
+import httpStatus from 'http-status';
 import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { TAdmin } from '../admin/admin.interface';
