@@ -86,8 +86,9 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
         path: 'academicFaculty',
       },
     });
+  const meta = await studentQuery.countTotal();
 
-  return result;
+  return { meta, result };
 };
 
 const getSingleStudentFromDB = async (id: string) => {
