@@ -43,6 +43,7 @@ const createStudentIntoDB = async (
     userData.id = await generateStudentId(admissionSemester!);
     const imageName = `${userData.id}-${payload?.name?.firstName}-${payload?.name?.lastName}`;
     const path = file?.path;
+
     // send image to cloudinary
     const { secure_url } = await sendImageToCloudinary(imageName, path);
 
