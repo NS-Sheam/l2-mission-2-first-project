@@ -3,6 +3,7 @@ import { AcademicFacultyControllers } from './academicFaculty.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { AcademicFacultyValidation } from './academicFaculty.validation';
 import auth from '../../middlewares/auth';
+import { USER_ROLE } from '../user/user.const';
 
 const router = Router();
 
@@ -21,6 +22,10 @@ router.patch(
   ),
   AcademicFacultyControllers.updateAcademicFaculty,
 );
-router.get('/', auth(), AcademicFacultyControllers.getAllAcademicFaculties);
+router.get(
+  '/',
+  auth(USER_ROLE.admin),
+  AcademicFacultyControllers.getAllAcademicFaculties,
+);
 
 export const AcademicFacultyRoutes = router;
