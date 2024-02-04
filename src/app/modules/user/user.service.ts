@@ -101,6 +101,17 @@ const createFacultyIntoDB = async (
   userData.role = 'faculty';
   // set faculty email
   userData.email = payload.email;
+
+  //find department
+  const academinDepartment = await AcademicDepartment.findById(
+    payload.academicDepartment,
+  );
+  if (!academinDepartment) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Academic Department not found');
+  }
+
+  payload.academicFaculty = academinDepartment.academicFaculty;
+
   userData.id = await generateFacultyId();
 
   if (file) {
