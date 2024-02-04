@@ -8,6 +8,8 @@ import { AcademicDepartment } from '../academicDepartment/academicDepartment.mod
 import { Course } from '../course/course.model';
 import { Faculty } from '../faculty/faculty.model';
 import { hasTimeConflict } from './offeredCourse.utils';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { Student } from '../student/student.model';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -107,7 +109,88 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
 };
 
 const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
-  const result = await OfferedCourse.find(query);
+  const offeredCourseQuery = new QueryBuilder(OfferedCourse.find(), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+  const result = await offeredCourseQuery.modelQuery;
+  const meta = await offeredCourseQuery.countTotal();
+  return {
+    meta,
+    result,
+  };
+};
+
+const getMyOfferedCoursesFromDB = async (userId: string) => {
+  const student = await Student.findOne({ id: userId });
+  if (!student) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  //find current ongoing semester
+  const currentOngoingRegistrationSemester = await SemesterRegistration.findOne(
+    {
+      status: 'ONGOING',
+    },
+  );
+
+  if (!currentOngoingRegistrationSemester) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No ongoing semester');
+  }
+
+  const result = await OfferedCourse.aggregate([
+    {
+      $match: {
+        semesterRegistration: currentOngoingRegistrationSemester._id,
+        academicFaculty: student.academicFaculty,
+        academicDepartment: student.academicDepartment,
+      },
+    },
+    {
+      $lookup: {
+        from: 'courses',
+        localField: 'course',
+        foreignField: '_id',
+        as: 'course',
+      },
+    },
+    {
+      $unwind: '$course',
+    },
+    {
+      $lookup: {
+        from: 'enrolledCourses',
+        let: {
+          currentOngoingRegistrationSemester:
+            currentOngoingRegistrationSemester._id,
+          currentStudent: student._id,
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $eq: [
+                      '$semesterRegistration',
+                      '$$currentOngoingRegistrationSemester',
+                    ],
+                  },
+                  {
+                    $eq: ['$student', '$$currentStudent'],
+                  },
+                  {
+                    $eq: ['$isEnrolled', true],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
   return result;
 };
 
@@ -192,4 +275,5 @@ export const OfferedCourseServices = {
   getSingleOfferedCourseFromDB,
   updateOfferedCourseIntoDB,
   deleteOfferedCourseFromDB,
+  getMyOfferedCoursesFromDB,
 };
