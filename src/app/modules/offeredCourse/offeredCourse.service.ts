@@ -294,6 +294,7 @@ const getMyOfferedCoursesFromDB = async (
       total,
       totalPage,
     },
+    result,
   };
 };
 
