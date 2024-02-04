@@ -159,7 +159,7 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
     },
     {
       $lookup: {
-        from: 'enrolledCourses',
+        from: 'enrolledcourses',
         let: {
           currentOngoingRegistrationSemester:
             currentOngoingRegistrationSemester._id,
@@ -187,6 +187,28 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
             },
           },
         ],
+        as: 'enrolledCourses',
+      },
+    },
+    {
+      $addFields: {
+        isAlreadyEnrolled: {
+          $in: [
+            '$course._id',
+            {
+              $map: {
+                input: '$enrolledCourses',
+                as: 'enroll',
+                in: '$$enroll.course',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      $match: {
+        isAlreadyEnrolled: false,
       },
     },
   ]);

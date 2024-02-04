@@ -204,14 +204,14 @@ const updateEnrolledCourseMarksIntoDB = async (
   if (courseMarks?.finalTerm) {
     const { classTest1, classTest2, midTerm, finalTerm } =
       isTheCourseBelongsToFaculy.courseMarks;
-    // const totalMarks =
-    //   Math.ceil(classTest1 * 0.1) +
-    //   Math.ceil(midTerm * 0.3) +
-    //   Math.ceil(classTest2 * 0.1) +
-    //   Math.ceil(finalTerm * 0.5);
+    const totalMarks =
+      Math.ceil(classTest1) +
+      Math.ceil(midTerm) +
+      Math.ceil(classTest2) +
+      Math.ceil(finalTerm);
 
-    const totalMarks = classTest1 + midTerm + classTest2 + finalTerm;
-    console.log(totalMarks);
+    // const totalMarks = classTest1 + midTerm + classTest2 + finalTerm;
+    // console.log(totalMarks);
 
     const result = calculateGradeAndPoints(totalMarks);
 
