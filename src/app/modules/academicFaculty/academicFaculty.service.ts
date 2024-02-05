@@ -7,7 +7,9 @@ const createAcademicFacultyIntoDB = async (payload: TAcademicFaculty) => {
   return result;
 };
 
-const getAllAcademicFacultiesFromDB = async (query: Record<string, unknown>) => {
+const getAllAcademicFacultiesFromDB = async (
+  query: Record<string, unknown>,
+) => {
   const academicFacultyQuery = new QueryBuilder(
     AcademicFaculty.find().populate('academicFaculty'),
     query,
@@ -21,7 +23,6 @@ const getAllAcademicFacultiesFromDB = async (query: Record<string, unknown>) => 
   return {
     meta,
     result,
-  };
   };
 };
 
