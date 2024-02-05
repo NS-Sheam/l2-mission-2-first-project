@@ -28,7 +28,8 @@ const getMyEnrolledCourses = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'My EnrolledCourses fetched successfully',
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 

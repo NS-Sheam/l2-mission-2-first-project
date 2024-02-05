@@ -269,6 +269,7 @@ const getEnrolledCoursesFromDB = async () => {
 
 export const EnrolledCourseServices = {
   createEnrolledCourseIntoDB,
+  getMyEnrolledCoursesFromDB,
   updateEnrolledCourseMarksIntoDB,
   getEnrolledCoursesFromDB,
 };
