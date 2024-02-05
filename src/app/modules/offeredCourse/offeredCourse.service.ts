@@ -114,8 +114,8 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fields();
-  const result = await offeredCourseQuery.modelQuery;
   const meta = await offeredCourseQuery.countTotal();
+  const result = await offeredCourseQuery.modelQuery;
   return {
     meta,
     result,
@@ -286,14 +286,14 @@ const getMyOfferedCoursesFromDB = async (
 
   const total = (await OfferedCourse.aggregate(aggreationQuery)).length;
 
-  const totalPage = Math.ceil(result.length / limit);
+  const totalPages = Math.ceil(result.length / limit);
 
   return {
     meta: {
       page,
       limit,
       total,
-      totalPage,
+      totalPages,
     },
     result,
   };

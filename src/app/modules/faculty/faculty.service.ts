@@ -10,14 +10,15 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fields();
-  const result = await facultyQuery.modelQuery.populate({
-    path: 'academicDepartment',
-    populate: {
-      path: 'academicFaculty',
-    },
-  });
+  const meta = await facultyQuery.countTotal();
+  const result = await facultyQuery.modelQuery.populate(
+    'academicDepartment academicFaculty',
+  );
 
-  return result;
+  return {
+    result,
+    meta,
+  };
 };
 
 const getSingleFacultyFromDB = async (id: string) => {

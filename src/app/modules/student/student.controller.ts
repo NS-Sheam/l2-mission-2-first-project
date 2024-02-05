@@ -9,7 +9,8 @@ const getAllStudents = catchAsync(async (req, res) => {
   res.status(200).json({
     status: true,
     message: 'Students retrived successfully',
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 
