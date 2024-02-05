@@ -285,6 +285,7 @@ const getMyOfferedCoursesFromDB = async (
   ]);
 
   const total = (await OfferedCourse.aggregate(aggreationQuery)).length;
+
   const totalPage = Math.ceil(result.length / limit);
 
   return {
