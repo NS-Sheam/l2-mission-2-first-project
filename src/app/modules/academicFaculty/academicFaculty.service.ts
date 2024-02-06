@@ -10,10 +10,7 @@ const createAcademicFacultyIntoDB = async (payload: TAcademicFaculty) => {
 const getAllAcademicFacultiesFromDB = async (
   query: Record<string, unknown>,
 ) => {
-  const academicFacultyQuery = new QueryBuilder(
-    AcademicFaculty.find().populate('academicFaculty'),
-    query,
-  )
+  const academicFacultyQuery = new QueryBuilder(AcademicFaculty.find(), query)
     .filter()
     .sort()
     .paginate()
