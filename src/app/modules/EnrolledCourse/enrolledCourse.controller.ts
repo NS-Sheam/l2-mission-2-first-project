@@ -49,13 +49,16 @@ const updateEnrolledCourseMarks = catchAsync(async (req, res) => {
   });
 });
 const getEnrolledCourses = catchAsync(async (req, res) => {
-  const result = await EnrolledCourseServices.getEnrolledCoursesFromDB();
+  const result = await EnrolledCourseServices.getEnrolledCoursesFromDB(
+    req.query,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'EnrolledCourses data fetch successfully',
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 

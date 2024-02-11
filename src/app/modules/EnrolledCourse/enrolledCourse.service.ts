@@ -262,9 +262,19 @@ const updateEnrolledCourseMarksIntoDB = async (
   return result;
 };
 
-const getEnrolledCoursesFromDB = async () => {
-  const result = await EnrolledCourse.find();
-  return result;
+const getEnrolledCoursesFromDB = async (query: Record<string, unknown>) => {
+  const enrolledCourseQuery = new QueryBuilder(EnrolledCourse.find(), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await enrolledCourseQuery.modelQuery;
+  const meta = await enrolledCourseQuery.countTotal();
+  return {
+    meta,
+    result,
+  };
 };
 
 export const EnrolledCourseServices = {

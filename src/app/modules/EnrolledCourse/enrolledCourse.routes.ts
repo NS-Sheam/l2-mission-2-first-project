@@ -33,7 +33,7 @@ router.patch(
 
 router.get(
   '/',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
   EnrolledCourseControllers.getEnrolledCourses,
 );
 
